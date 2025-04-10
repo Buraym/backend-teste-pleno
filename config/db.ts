@@ -1,7 +1,7 @@
 import { Sequelize } from "sequelize";
 import "dotenv/config";
 
-export async function GetConnection() {
+export default async function GetConnection() {
   const sequelize = new Sequelize(
     process.env.DB_NAME!,
     process.env.DB_USER!,

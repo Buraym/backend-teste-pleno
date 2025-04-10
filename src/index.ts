@@ -1,7 +1,19 @@
-import { GetConnection } from "../config/db";
+import app from "./app";
+import GetConnection from "../config/db";
+import "dotenv/config";
 
-export default async function Main() {
-  const conn = await GetConnection();
-}
+const PORT = process.env.SERVER_PORT || 8000;
 
-Main();
+(async () => {
+  try {
+    const db = await GetConnection();
+    await db.authenticate();
+    await db.sync();
+
+    app.listen(PORT, () => {
+      console.log(`SERVIDOR ATIVO RODANDO NA PORTA ${PORT}`);
+    });
+  } catch (error) {
+    console.error("HOUVE UM ERRO AO ATIVAR O SERVIDOR", error);
+  }
+})();
