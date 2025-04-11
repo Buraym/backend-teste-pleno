@@ -7,7 +7,7 @@ import {
   PaycheckListing,
   PaycheckPDFImport,
   PaycheckUpdate,
-} from "../controllers/Paycheck";
+} from "../../controllers/paycheck";
 const router = express.Router();
 const upload = multer({ dest: "uploads/" });
 
