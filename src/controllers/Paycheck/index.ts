@@ -111,6 +111,7 @@ export async function PaycheckDestroy(req: Request, res: Response) {
       where: {
         id,
       },
+      cascade: true,
     });
     return res.status(204);
   } catch (err) {
