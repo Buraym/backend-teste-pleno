@@ -147,7 +147,6 @@ export async function generatePaycheckReport(paychecks: any[], filters: any[]) {
     `;
   await page.setContent(html);
   const pdfBuffer = await page.pdf({ format: "A4", printBackground: true });
-  fs.writeFileSync("reports/relatorio.pdf", pdfBuffer);
   await browser.close();
   return Buffer.from(pdfBuffer).toString("base64");
 }
