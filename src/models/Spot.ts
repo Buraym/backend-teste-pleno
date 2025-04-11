@@ -1,4 +1,4 @@
-import { DataTypes, Deferrable } from "sequelize";
+import { DataTypes } from "sequelize";
 import { conn } from "../../config/db";
 
 const Spot = conn.define(
