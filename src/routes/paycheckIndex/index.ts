@@ -1,14 +1,20 @@
 import express from "express";
 import { SpotCreation, SpotDestroy, SpotListing } from "../../controllers/spot";
+import {
+  PaycheckIndexCreation,
+  PaycheckIndexDestroy,
+  PaycheckIndexListing,
+  PaycheckIndexUpdate,
+} from "../../controllers/paycheckIndex";
 
 const router = express.Router();
 
-router.get("/", SpotListing);
+router.get("/", PaycheckIndexListing);
 
-router.post("/", SpotCreation);
+router.post("/", PaycheckIndexCreation);
 
-router.put("/", SpotCreation);
+router.put("/", PaycheckIndexUpdate);
 
-router.delete("/", SpotDestroy);
+router.delete("/", PaycheckIndexDestroy);
 
 export default router;
