@@ -66,11 +66,11 @@ export async function PaycheckListing(req: Request, res: Response) {
 
 export async function PaycheckCreation(req: Request, res: Response) {
   try {
-    const { name, value, spot, code } = req.body;
+    const { name, value, spot_id, code } = req.body;
     const paycheck = await Paycheck.create({
       name,
       value,
-      spot,
+      spot_id,
       code,
       active: true,
     });
@@ -83,12 +83,12 @@ export async function PaycheckCreation(req: Request, res: Response) {
 export async function PaycheckUpdate(req: Request, res: Response) {
   try {
     const { id } = req.query;
-    const { name, value, spot, active, code } = req.body;
+    const { name, value, spot_id, active, code } = req.body;
     const paycheck = await Paycheck.update(
       {
         name,
         value,
-        spot,
+        spot_id,
         code,
         active,
       },

@@ -14,10 +14,10 @@ export async function SpotListing(req: Request, res: Response) {
 
 export async function SpotCreation(req: Request, res: Response) {
   try {
-    const { name } = req.body;
+    const { name, active } = req.body;
     const spot = await Spot.create({
       name,
-      active: true,
+      active,
     });
     return res.status(202).json({ spot });
   } catch (err) {
