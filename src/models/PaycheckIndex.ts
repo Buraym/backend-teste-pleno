@@ -15,7 +15,7 @@ const PaycheckIndex = conn.define(
     },
     position: {
       type: DataTypes.INTEGER,
-      allowNull: true,
+      allowNull: false,
     },
   },
   {
