@@ -3,6 +3,6 @@ import paycheckRouter from "./routes/paycheckRoutes";
 
 const app = express();
 app.use(express.json());
-app.use(paycheckRouter);
+app.use("/paychecks", paycheckRouter);
 
 export default app;

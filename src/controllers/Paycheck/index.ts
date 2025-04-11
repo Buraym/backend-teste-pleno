@@ -7,7 +7,116 @@ import { PDFDocument } from "pdf-lib";
 import Paycheck from "../../models/Paycheck";
 import Spot from "../../models/Spot";
 import PaycheckIndex from "../../models/PaycheckIndex";
-import puppeteer from "puppeteer";
+
+export async function PaycheckListing(req: Request, res: Response) {
+  const { nome, valor_inicial, valor_final, id_lote, relatorio, id_boleto } =
+    req.query;
+  let paychecks = [];
+  if (id_boleto) {
+    const paycheck = await Paycheck.findByPk(String(id_boleto));
+    paychecks = [paycheck];
+  } else if (!nome && !valor_inicial && !valor_final && !id_lote) {
+    paychecks = await Paycheck.findAll();
+  } else {
+    let conditions = {
+      active: {
+        [Op.eq]: true,
+      },
+    };
+    if (nome) {
+      // @ts-ignore
+      conditions.name = {
+        [Op.like]: `%${nome}%`,
+      };
+    }
+    if (valor_inicial || valor_final) {
+      // @ts-ignore
+      conditions.value = {
+        [Op.between]: [
+          valor_inicial ? valor_inicial : 0,
+          valor_final ? valor_final : null,
+        ],
+      };
+    }
+    if (id_lote) {
+      // @ts-ignore
+      conditions.spot_id = {
+        [Op.eq]: id_lote,
+      };
+    }
+    paychecks = await Paycheck.findAll({
+      where: conditions,
+    });
+  }
+  if (relatorio) {
+    const base64String = await generatePaycheckReport(
+      paychecks,
+      [
+        { title: "Nome sacado", name: "nome", val: nome },
+        { title: "Valor mínimo", name: "valor_inicial", val: valor_inicial },
+        { title: "Valor final", name: "valor_final", val: valor_final },
+        { title: "Número do lote", name: "id_lote", val: id_lote },
+      ].filter((row) => row.val !== undefined)
+    );
+    return res.json(base64String);
+  } else {
+    return res.json(paychecks);
+  }
+}
+
+export async function PaycheckCreation(req: Request, res: Response) {
+  try {
+    const { name, value, spot, code } = req.body;
+    const paycheck = await Paycheck.create({
+      name,
+      value,
+      spot,
+      code,
+      active: true,
+    });
+    return res.status(202).json({ paycheck });
+  } catch (err) {
+    return res.status(400).json({ error: "Erro ao cadastrar boleto" });
+  }
+}
+
+export async function PaycheckUpdate(req: Request, res: Response) {
+  try {
+    const { id } = req.query;
+    const { name, value, spot, code } = req.body;
+    const paycheck = await Paycheck.update(
+      {
+        name,
+        value,
+        spot,
+        code,
+        active: true,
+      },
+      {
+        where: {
+          id,
+        },
+      }
+    );
+    return res.status(204).json({ paycheck });
+  } catch (err) {
+    return res.status(400).json({ error: "Erro ao atualizar boleto" });
+  }
+}
+
+export async function PaycheckDestroy(req: Request, res: Response) {
+  try {
+    const { id } = req.query;
+    await Paycheck.destroy({
+      where: {
+        id,
+      },
+    });
+    return res.status(204);
+  } catch (err) {
+    return res.status(400).json({ error: "Erro ao deletar boleto" });
+  }
+}
 
 export async function PaycheckCSVImport(req: Request, res: Response) {
   const file = req.file as Express.Multer.File;
@@ -84,56 +193,4 @@ export async function PaycheckPDFImport(req: Request, res: Response) {
   const indexes = await PaycheckIndex.findAll();
 
   return res.json("FOI SEPARADO NOS ARQUIVOS");
-}
-
-export async function PaycheckListing(req: Request, res: Response) {
-  const { nome, valor_inicial, valor_final, id_lote, relatorio } = req.query;
-  let paychecks = [];
-  if (!nome && !valor_inicial && !valor_final && !id_lote) {
-    paychecks = await Paycheck.findAll();
-  } else {
-    let conditions = {
-      active: {
-        [Op.eq]: true,
-      },
-    };
-    if (nome) {
-      // @ts-ignore
-      conditions.name = {
-        [Op.like]: `%${nome}%`,
-      };
-    }
-    if (valor_inicial || valor_final) {
-      // @ts-ignore
-      conditions.value = {
-        [Op.between]: [
-          valor_inicial ? valor_inicial : 0,
-          valor_final ? valor_final : null,
-        ],
-      };
-    }
-    if (id_lote) {
-      // @ts-ignore
-      conditions.spot_id = {
-        [Op.eq]: id_lote,
-      };
-    }
-    paychecks = await Paycheck.findAll({
-      where: conditions,
-    });
-  }
-  if (relatorio) {
-    const base64String = await generatePaycheckReport(
-      paychecks,
-      [
-        { title: "Nome sacado", name: "nome", val: nome },
-        { title: "Valor mínimo", name: "valor_inicial", val: valor_inicial },
-        { title: "Valor final", name: "valor_final", val: valor_final },
-        { title: "Número do lote", name: "id_lote", val: id_lote },
-      ].filter((row) => row.val !== undefined)
-    );
-    return res.json(base64String);
-  } else {
-    return res.json(paychecks);
-  }
 }
